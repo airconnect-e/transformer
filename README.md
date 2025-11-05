@@ -43,6 +43,20 @@ pip install -U transformers datasets evaluate accelerate
  Cell 3: config
 ประกาศ dataclass CFG เก็บ hyperparams (model_name, img_size, batch_size, epochs, lr, weight_decay, seed, ignore_index) และสร้าง cfg instance
  ผลลัพธ์: ตัวแปร cfg ที่ทุกเซลล์ใช้ต่อสามารถกำหนดค่าต่างๆได้ที่เซลล์นี้
+ 
+```bash
+ CFG = {
+  "model_name": "nvidia/segformer-b1-finetuned-ade-512-512",
+  "img_size": 512,
+  "batch_size": 10,
+  "epochs": 25,
+  "lr": 3e-4,
+  "weight_decay": 0.0,
+  "seed": 42,
+  "output_dir": "outputs/"
+}
+```
+
 
  Cell 4: processor & model
  โหลด AutoImageProcessor และ SegformerForSemanticSegmentation จาก Hugging Face แล้วนำโมเดลไปรันด้วย GPU (ถ้ามี)

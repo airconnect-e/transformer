@@ -5,12 +5,12 @@ Cell 1: paths & pairs
 สำคัญที่ต้องแก้ก่อนรัน: ROOT ต้องชี้ไปยัง dataset ของคุณจริง ๆ
 
 ## library 
-'''bash
+```bash
 pip install "numpy<2.3.0" --force-reinstall
 pip install -U pillow matplotlib
 pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -U transformers datasets evaluate accelerate
-'''
+```
 
 ## Cell 2:
 กำหนด จำนวนclass labels เป็น 2

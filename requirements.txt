@@ -11,18 +11,19 @@ accelerate>=0.20.0
 
 # Image Processing
 Pillow>=9.5.0
-opencv-python-headless>=4.7.0
 
 # Data Science & Visualization
-numpy<2.3.0
+numpy>=1.24.0,<2.0.0
 pandas>=1.5.0
 matplotlib>=3.7.0
-scikit-learn>=1.2.0
 
 # Utilities
 gdown>=4.7.0
 tqdm>=4.65.0
 
-# Optional: For better performance
+# Optional: For better performance with CUDA
 # If you have CUDA 12.1, install PyTorch with:
-# --index-url https://download.pytorch.org/whl/cu121
+# pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Note: Standard Python libraries (os, json, glob, csv, zipfile, dataclasses, inspect)
+# are included with Python and don't need to be installed

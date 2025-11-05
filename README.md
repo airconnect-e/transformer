@@ -15,6 +15,7 @@ project-root/
 │ ├─ pred_overlays_test/
 │ └─ checkpoints/
 ├─ tranformer_road_rgb.py # โค้ดหลัก (หรือเป็น notebook แยกเป็นเซลล์)
+├─ requirements.txt
 └─ README.md
 ```
 

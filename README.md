@@ -1,8 +1,14 @@
 # transformer
 Cell 1: paths & pairs
 กำหนดPath (ROOT / OUTPUT_DIR) แล้วสร้างฟังก์ชันสำหรับหาไฟล์ภาพและแมสก์ (list_images, normalize_stem, build_pairs) → สร้าง train_pairs และ test_pairs เป็น list ของ (image_path, mask_path)
- ผลลัพธ์: ตัวแปร train_pairs / test_pairs ที่โค้ดอื่นจะใช้ต่อ
- สำคัญที่ต้องแก้ก่อนรัน: ROOT ต้องชี้ไปยัง dataset ของคุณจริง ๆ
+ผลลัพธ์: ตัวแปร train_pairs / test_pairs ที่โค้ดอื่นจะใช้ต่อ
+สำคัญที่ต้องแก้ก่อนรัน: ROOT ต้องชี้ไปยัง dataset ของคุณจริง ๆ
+ 
+bash
+!pip install "numpy<2.3.0" --force-reinstall
+!pip install -U pillow matplotlib
+!pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+!pip install -U transformers datasets evaluate accelerate
 
  Cell 2:
 กำหนด จำนวนclass labels เป็น 2
@@ -64,13 +70,6 @@ Cell 13
 
 Cell 14
 อ่าน trainer.state.log_history แล้วแยก train_loss และ eval_loss ที่ถูก log เพื่อพล็อตกราฟเปรียบเทียบ (train vs eval) — ช่วยดูว่า overfit หรือไม่
-
-bash
-!pip install "numpy<2.3.0" --force-reinstall
-!pip install -U pillow matplotlib
-!pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-!pip install -U transformers datasets evaluate accelerate
-
 
 Cell 15
 วนเทสบน train_pairs, ทำ predict, ถ้ามี GT คำนวณ confusion, เก็บ metrics_train_per_image.csv และ metrics_train_summary.csv.

@@ -14,7 +14,7 @@ Cell 1: paths & pairs
 สร้างฟังกันชั่น remap_mask_to_contiguous เพื่ออ่านค่าสีและคืนค่ากลับมาเป็นตัวเลข
 
  cell 2.5:
- อ่านเลขที่ได้จากการ map เห็นค่าสีที่อ่านได้เป็น 0 1 255
+ อ่านเลขที่ได้จากการ map เห็นค่าสีที่อ่านได้เป็น 0 1
 
  Cell 3: config
 ประกาศ dataclass CFG เก็บ hyperparams (model_name, img_size, batch_size, epochs, lr, weight_decay, seed, ignore_index) และสร้าง cfg instance

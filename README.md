@@ -80,32 +80,44 @@ print("Download and unzip completed! Files are in ./unet_dataset")
 ```
 
 
- Cell 4: processor & model
+#Cell 4: processor & model
  โหลด AutoImageProcessor และ SegformerForSemanticSegmentation จาก Hugging Face แล้วนำโมเดลไปรันด้วย GPU (ถ้ามี)
  ผลลัพธ์: processor และ model พร้อมใช้
  
-Cell 5: datasets
+#Cell 5: datasets
 สร้าง DatasetDict จาก train_pairs/test_pairs แล้วใช้ _load_example map ทุกตัวเพื่อ:
 เปิดภาพ → convert RGB
 ถ้ามี mask → โหลด, เปลี่ยนขนาดเป็น cfg.img_size และ remap labels → ใช้ processor(images=..., segmentation_maps=[m]) เพื่อได้ pixel_values และ labels เป็น tensor
 ตั้ง ds.set_format(type="torch", columns=["pixel_values","labels"])
  ผลลัพธ์: ds["train"], ds["test"] พร้อมให้ Trainer ใช้งาน
- 
-Cell 6: metrics + TrainingArguments
+
+#create dataset
+```bash
+from datasets import Dataset, DatasetDict
+
+def to_dataset(pairs):
+    return Dataset.from_dict({"image_path":[ip for ip,_ in pairs],
+                              "mask_path":[mp for _,mp in pairs]})
+
+ds = DatasetDict({"train": to_dataset(train_pairs),
+                  "test":  to_dataset(test_pairs)})
+```
+
+#Cell 6: metrics + TrainingArguments
 สร้าง iou_score และ compute_metrics (ที่ Trainer จะเรียก) แล้วเตรียม TrainingArguments (eval_strategy, save_strategy, logging, fp16, load_best_model_at_end, metric_for_best_model="eval_mean_iou" )
  
 
-Cell 7: training (Trainer + Callback)
+#Cell 7: training (Trainer + Callback)
 กำหนด LogTrainMetricsEachEpoch callback เพื่อ evaluate บน train_dataset หลังจบ epoch แล้ว log ผล (เพื่อดู train mIoU ทันที)
 สร้าง Trainer (model, args, train_dataset, eval_dataset=ds["test"], processing_class=processor, compute_metrics=compute_metrics)
 เรียก trainer.train() และบันทึก model + processor ไปที่ cfg.output_dir
 
-Cell 8: inference & save
+#Cell 8: inference & save
 ฟังก์ชัน overlay_multi สร้างภาพ overlay แบบ multi-class (ใช้ colormap และใส่ alpha)
 predict_pil(img_pil) preprocess ผ่าน processor, ทำ forward model → ปรับ logits ให้ match ขนาดรูปจริง ถ้าต่างด้วย F.interpolate → คืน pred mask (argmax)
 ลูปผ่าน test_pairs แล้วเก็บ pred mask และ overlay image ลงโฟลเดอร์ (pred_masks_test, pred_overlays_test)
 
-Cell 9: per-image metrics & summary
+#Cell 9: per-image metrics & summary
 ฟังก์ชัน confusion_from_pair แปลง pred/gt เป็น confusion matrix, metrics_from_cm คำนวณ mIoU ต่อคลาสและ summary
 วนไฟล์ใน test_pairs, โหลด pred จากไฟล์ที่เซฟไว้ หรือ predict ใหม่ → ถ้ามี GT จะ remap และคำนวณ CM แล้วเขียน per-image csv และรวม CM เป็น cm_total → สร้าง summary CSV (metrics_test_summary.csv)
 

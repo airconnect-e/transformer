@@ -11,7 +11,7 @@ pip install -U pillow matplotlib
 pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 pip install -U transformers datasets evaluate accelerate
 
- Cell 2:
+## Cell 2:
 กำหนด จำนวนclass labels เป็น 2
 และค่าสีเป็น 255
 สร้างฟังกันชั่น remap_mask_to_contiguous เพื่ออ่านค่าสีและคืนค่ากลับมาเป็นตัวเลข

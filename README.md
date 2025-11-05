@@ -4,7 +4,7 @@ Cell 1: paths & pairs
 ผลลัพธ์: ตัวแปร train_pairs / test_pairs ที่โค้ดอื่นจะใช้ต่อ
 สำคัญที่ต้องแก้ก่อนรัน: ROOT ต้องชี้ไปยัง dataset ของคุณจริง ๆ
  
-'''bash
+''' bash
 !pip install "numpy<2.3.0" --force-reinstall
 !pip install -U pillow matplotlib
 !pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121

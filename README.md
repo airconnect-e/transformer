@@ -26,10 +26,13 @@ project-root/
 
 ## library 
 ```bash
-pip install "numpy<2.3.0" --force-reinstall
-pip install -U pillow matplotlib
-pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-pip install -U transformers datasets evaluate accelerate
+!pip install "numpy<2.3.0" --force-reinstall
+!pip install -U pillow matplotlib
+!pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+!pip install -U transformers datasets evaluate accelerate
+!pip install PyDrive
+!pip install -U opencv-python-headless
+!pip install --upgrade gdown
 ```
 
 ## Cell 2:

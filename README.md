@@ -18,6 +18,25 @@ project-root/
 └─ README.md
 ```
 
+#download file from google drive and extract file
+```bash
+import gdown
+import os
+
+# File ID ของไฟล์ zip
+file_id = "1ndCj8rEXuaQkMhfJWBclEeZAp3cbNwzR"
+zip_path = "./unet_dataset.zip"
+
+# ดาวน์โหลดไฟล์ zip
+gdown.download(f"https://drive.google.com/uc?id={file_id}", zip_path, quiet=False)
+
+# แตกไฟล์ zip
+import zipfile
+with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+    zip_ref.extractall("./unet_dataset")
+
+print("Download and unzip completed! Files are in ./unet_dataset")
+```
 
 #Cell 1: paths & pairs
 กำหนดPath (ROOT / OUTPUT_DIR) แล้วสร้างฟังก์ชันสำหรับหาไฟล์ภาพและแมสก์ (list_images, normalize_stem, build_pairs) → สร้าง train_pairs และ test_pairs เป็น list ของ (image_path, mask_path)

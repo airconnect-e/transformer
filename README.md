@@ -65,6 +65,13 @@ Cell 13
 Cell 14
 อ่าน trainer.state.log_history แล้วแยก train_loss และ eval_loss ที่ถูก log เพื่อพล็อตกราฟเปรียบเทียบ (train vs eval) — ช่วยดูว่า overfit หรือไม่
 
+bash
+!pip install "numpy<2.3.0" --force-reinstall
+!pip install -U pillow matplotlib
+!pip install -U torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+!pip install -U transformers datasets evaluate accelerate
+
+
 Cell 15
 วนเทสบน train_pairs, ทำ predict, ถ้ามี GT คำนวณ confusion, เก็บ metrics_train_per_image.csv และ metrics_train_summary.csv.
 มีฟังก์ชัน train_risk_hint(summary_path, high_bar=0.85) ให้ hint ว่า train mIoU สูงเกินไปอาจเป็นสัญญาณ overfit.

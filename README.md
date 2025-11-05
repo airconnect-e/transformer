@@ -105,7 +105,69 @@ ds = DatasetDict({"train": to_dataset(train_pairs),
 
 #Cell 6: metrics + TrainingArguments
 สร้าง iou_score และ compute_metrics (ที่ Trainer จะเรียก) แล้วเตรียม TrainingArguments (eval_strategy, save_strategy, logging, fp16, load_best_model_at_end, metric_for_best_model="eval_mean_iou" )
- 
+
+#set arguments
+```bash
+args = TrainingArguments(
+    output_dir=cfg.output_dir,
+    per_device_train_batch_size=cfg.batch_size,
+    per_device_eval_batch_size=cfg.batch_size,
+    learning_rate=cfg.lr,
+    num_train_epochs=cfg.epochs,
+    weight_decay=cfg.weight_decay,
+
+    # สำคัญ: เวอร์ชันของคุณใช้ 'eval_strategy'
+    eval_strategy=IntervalStrategy.EPOCH,  # หรือ eval_strategy="epoch"
+
+    save_strategy="epoch",
+    logging_strategy="steps",
+    logging_steps=50,
+    save_total_limit=2,
+    report_to=[],
+    push_to_hub=False,
+    remove_unused_columns=False,
+    dataloader_num_workers=2,
+    fp16=torch.cuda.is_available(),
+    seed=cfg.seed,
+
+    load_best_model_at_end=True,
+    metric_for_best_model="eval_mean_iou",
+    greater_is_better=True,
+)
+```
+
+#create function iou_score
+```bash
+def iou_score(pred, target, num_classes, ignore_index=255):
+    mask = np.ones_like(target, dtype=bool)
+    if ignore_index is not None:
+        mask &= (target != ignore_index)
+    ious = []
+    for c in range(num_classes):
+        p = (pred == c) & mask
+        t = (target == c) & mask
+        inter = np.logical_and(p, t).sum()
+        union = np.logical_or(p, t).sum()
+        ious.append(inter/union if union else 0.0)
+    return np.array(ious), float(np.mean(ious)) if ious else 0.0
+```
+#create function compute_metrics
+```bash
+def compute_metrics(eval_preds):
+    logits, labels = (eval_preds if isinstance(eval_preds, tuple)
+                      else (eval_preds.predictions, eval_preds.label_ids))
+    preds = logits.argmax(1)
+    bs = preds.shape[0]; miou_list = []
+    for i in range(bs):
+        p = preds[i].astype(np.int32)
+        y = labels[i].astype(np.int32)
+        # ขนาดไม่เท่า ปรับด้วย PIL แบบ NEAREST
+        if y.shape != p.shape:
+            y = np.array(Image.fromarray(y).resize((p.shape[1], p.shape[0]), Image.NEAREST))
+        _, miou = iou_score(p, y, NUM_LABELS, ignore_index=cfg.ignore_index)
+        miou_list.append(miou)
+    return {"mean_iou": float(np.mean(miou_list))}
+```
 
 #Cell 7: training (Trainer + Callback)
 กำหนด LogTrainMetricsEachEpoch callback เพื่อ evaluate บน train_dataset หลังจบ epoch แล้ว log ผล (เพื่อดู train mIoU ทันที)
@@ -116,6 +178,33 @@ ds = DatasetDict({"train": to_dataset(train_pairs),
 ฟังก์ชัน overlay_multi สร้างภาพ overlay แบบ multi-class (ใช้ colormap และใส่ alpha)
 predict_pil(img_pil) preprocess ผ่าน processor, ทำ forward model → ปรับ logits ให้ match ขนาดรูปจริง ถ้าต่างด้วย F.interpolate → คืน pred mask (argmax)
 ลูปผ่าน test_pairs แล้วเก็บ pred mask และ overlay image ลงโฟลเดอร์ (pred_masks_test, pred_overlays_test)
+
+# นำmask มาทับกับภาพinput เพื่อให้มองภาพง่ายขึ้น
+```bash
+def overlay_multi(img_pil, mask_ids, alpha=0.45):
+    img = img_pil.convert("RGBA")
+    h, w = mask_ids.shape
+    K = int(mask_ids.max()) + 1
+    cmap = plt.get_cmap("tab20")
+    cols = (cmap(np.linspace(0,1,max(K,2)))[:, :3] * 255).astype(np.uint8)
+    ov = np.zeros((h, w, 4), dtype=np.uint8)
+    for c in range(1, K):
+        m = (mask_ids == c)
+        if m.any():
+            ov[m,:3] = cols[c]; ov[m,3] = int(255*alpha)
+    return Image.alpha_composite(img, Image.fromarray(ov))
+```
+#นำภาพเข้าโมเดลแล้วได้ผลลัพธ์ออกมาเป็น mask
+```bash
+def predict_pil(img_pil):
+    x = processor(images=img_pil, return_tensors="pt").to(device)
+    logits = model(**x).logits
+    H, W = img_pil.size[1], img_pil.size[0]
+    if logits.shape[-2:] != (H,W):
+        logits = F.interpolate(logits, size=(H,W), mode="bilinear", align_corners=False)
+    pred = logits.argmax(1)[0].cpu().numpy().astype(np.uint8)
+    return pred
+```
 
 #Cell 9: per-image metrics & summary
 ฟังก์ชัน confusion_from_pair แปลง pred/gt เป็น confusion matrix, metrics_from_cm คำนวณ mIoU ต่อคลาสและ summary
